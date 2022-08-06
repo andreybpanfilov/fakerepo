@@ -4,13 +4,13 @@
     <parent>
         <groupId>tel.panfilov.maven</groupId>
         <artifactId>fakerepo</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>tel.panfilov.maven</groupId>
     <artifactId>fakerepo-maven-extension</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <dependencies>
