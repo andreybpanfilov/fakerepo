@@ -31,7 +31,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.version>3.2.5</maven.version>
+        <maven.version>3.3.9</maven.version>
         <maven.plugin.tools.version>3.6.4</maven.plugin.tools.version>
         <project.build.outputTimestamp>2022-08-05T21:16:15Z</project.build.outputTimestamp>
         <flatten.mode>oss</flatten.mode>

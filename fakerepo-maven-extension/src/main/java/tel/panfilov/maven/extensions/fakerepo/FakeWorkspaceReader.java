@@ -4,6 +4,8 @@ import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.repository.WorkspaceReader;
 import org.eclipse.aether.repository.WorkspaceRepository;
@@ -15,37 +17,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component(role = FakeWorkspaceReader.class)
 public class FakeWorkspaceReader implements WorkspaceReader {
 
-    private final WorkspaceReader workspaceReader;
+    @Requirement
+    private ArtifactHandlerManager artifactHandlerManager;
 
-    private final Map<String, MavenProject> projectMap;
+    private final WorkspaceRepository repository = new WorkspaceRepository();
 
-    private final ArtifactHandlerManager artifactHandlerManager;
+    private final Map<String, MavenProject> projectMap = new HashMap<>();
 
-    public FakeWorkspaceReader(WorkspaceReader workspaceReader, MavenProject mavenProject, ArtifactHandlerManager artifactHandlerManager) {
-        this.workspaceReader = workspaceReader;
-        this.artifactHandlerManager = artifactHandlerManager;
-        this.projectMap = buildProjectMap(mavenProject);
+    public void addProject(MavenProject project) {
+        projectMap.put(getId(project), project);
     }
 
     @Override
     public WorkspaceRepository getRepository() {
-        return workspaceReader.getRepository();
+        return repository;
     }
 
     @Override
     public File findArtifact(Artifact artifact) {
-        File result;
         if ("pom".equals(artifact.getExtension())) {
-            result = getPom(artifact);
-        } else {
-            result = getArtifact(artifact);
+            return getPom(artifact);
         }
-        if (result == null) {
-            result = workspaceReader.findArtifact(artifact);
-        }
-        return result;
+        return getArtifact(artifact);
     }
 
     protected File getPom(Artifact artifact) {
@@ -97,16 +93,7 @@ public class FakeWorkspaceReader implements WorkspaceReader {
         if (project != null) {
             return Collections.singletonList(project.getVersion());
         }
-        return workspaceReader.findVersions(artifact);
-    }
-
-    protected Map<String, MavenProject> buildProjectMap(MavenProject project) {
-        Map<String, MavenProject> result = new HashMap<>();
-        result.put(getId(project), project);
-        for (MavenProject child : project.getCollectedProjects()) {
-            result.put(getId(child), child);
-        }
-        return result;
+        return Collections.emptyList();
     }
 
     protected String getId(MavenProject project) {
