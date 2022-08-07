@@ -79,9 +79,7 @@ public class FakeWorkspaceReader implements WorkspaceReader {
         }
 
         Build build = project.getBuild();
-
-        StringBuilder name = new StringBuilder(artifact.getArtifactId());
-        name.append('-').append(artifact.getVersion());
+        StringBuilder name = new StringBuilder(build.getFinalName());
         if (!StringUtils.isEmpty(artifact.getClassifier())) {
             name.append('-').append(artifact.getClassifier());
         }
@@ -90,15 +88,6 @@ public class FakeWorkspaceReader implements WorkspaceReader {
         if (isActual(file, artifact, project)) {
             return file;
         }
-
-        boolean mainArtifact = StringUtils.isEmpty(artifact.getClassifier()) && artifact.getExtension().equals(getExtension(project));
-        if (mainArtifact && !StringUtils.isEmpty(build.getFinalName())) {
-            file = new File(build.getDirectory(), build.getFinalName() + "." + artifact.getExtension());
-            if (isActual(file, artifact, project)) {
-                return file;
-            }
-        }
-
         return null;
     }
 
