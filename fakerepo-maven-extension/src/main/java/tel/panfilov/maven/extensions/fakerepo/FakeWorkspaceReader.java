@@ -1,6 +1,6 @@
 package tel.panfilov.maven.extensions.fakerepo;
 
-import org.apache.maven.artifact.handler.ArtifactHandler;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Component(role = FakeWorkspaceReader.class)
@@ -40,7 +41,7 @@ public class FakeWorkspaceReader implements WorkspaceReader {
     private final Map<String, MavenProject> projectMap = new HashMap<>();
 
     public void addProject(MavenProject project) {
-        projectMap.put(getId(project), project);
+        projectMap.put(getProjectId(project), project);
     }
 
     public void setBuildStartTime(long buildStartTime) {
@@ -61,7 +62,7 @@ public class FakeWorkspaceReader implements WorkspaceReader {
     }
 
     protected File getPom(Artifact artifact) {
-        MavenProject project = projectMap.get(getId(artifact));
+        MavenProject project = projectMap.get(getProjectId(artifact));
         if (project == null) {
             return null;
         }
@@ -73,18 +74,24 @@ public class FakeWorkspaceReader implements WorkspaceReader {
     }
 
     protected File getArtifact(Artifact artifact) {
-        MavenProject project = projectMap.get(getId(artifact));
+        MavenProject project = projectMap.get(getProjectId(artifact));
         if (project == null) {
             return null;
         }
 
+        File file = findProjectArtifact(project, artifact);
+        if (file != null) {
+            return file;
+        }
+
         Build build = project.getBuild();
+        // javadoc promises it is  ${artifactId}-${version}
         StringBuilder name = new StringBuilder(build.getFinalName());
         if (!StringUtils.isEmpty(artifact.getClassifier())) {
             name.append('-').append(artifact.getClassifier());
         }
         name.append('.').append(artifact.getExtension());
-        File file = new File(build.getDirectory(), name.toString());
+        file = new File(build.getDirectory(), name.toString());
         if (isActual(file, artifact, project)) {
             return file;
         }
@@ -98,7 +105,7 @@ public class FakeWorkspaceReader implements WorkspaceReader {
 
         Build build = project.getBuild();
         Path directory;
-        if ("tests".equals(artifact.getClassifier())) {
+        if (isTestArtifact(artifact)) {
             directory = Paths.get(build.getTestOutputDirectory());
         } else {
             directory = Paths.get(build.getOutputDirectory());
@@ -139,24 +146,42 @@ public class FakeWorkspaceReader implements WorkspaceReader {
 
     @Override
     public List<String> findVersions(Artifact artifact) {
-        MavenProject project = projectMap.get(getId(artifact));
+        MavenProject project = projectMap.get(getProjectId(artifact));
         if (project != null) {
             return Collections.singletonList(project.getVersion());
         }
         return Collections.emptyList();
     }
 
-    protected String getId(MavenProject project) {
+    protected File findProjectArtifact(MavenProject project, Artifact requested) {
+        String requestedId = getArtifactId(requested);
+        return Stream.concat(Stream.of(project.getArtifact()), project.getAttachedArtifacts().stream())
+                .filter(Objects::nonNull)
+                .map(RepositoryUtils::toArtifact)
+                .filter(a -> requestedId.equals(getArtifactId(a)))
+                .filter(a -> Objects.equals(requested.getExtension(), a.getVersion()))
+                .map(Artifact::getFile)
+                .filter(Objects::nonNull)
+                .filter(File::exists)
+                .findFirst()
+                .orElse(null);
+    }
+
+    protected boolean isTestArtifact(Artifact artifact) {
+        return ("test-jar".equals(artifact.getProperty("type", "")))
+                || ("jar".equals(artifact.getExtension()) && "tests".equals(artifact.getClassifier()));
+    }
+
+    protected String getProjectId(MavenProject project) {
         return project.getGroupId() + ':' + project.getArtifactId() + ':' + project.getVersion();
     }
 
-    protected String getId(Artifact artifact) {
+    protected String getProjectId(Artifact artifact) {
         return artifact.getGroupId() + ':' + artifact.getArtifactId() + ':' + artifact.getVersion();
     }
 
-    protected String getExtension(MavenProject project) {
-        ArtifactHandler artifactHandler = artifactHandlerManager.getArtifactHandler(project.getPackaging());
-        return artifactHandler.getExtension();
+    protected String getArtifactId(Artifact artifact) {
+        return artifact.getGroupId() + ':' + artifact.getArtifactId() + ':' + artifact.getExtension() + ':' + artifact.getClassifier();
     }
 
 }

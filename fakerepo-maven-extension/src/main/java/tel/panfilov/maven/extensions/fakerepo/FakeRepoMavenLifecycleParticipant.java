@@ -48,6 +48,13 @@ public class FakeRepoMavenLifecycleParticipant extends AbstractMavenLifecyclePar
         setupWorkspaceReader(session);
     }
 
+    @Override
+    public void afterProjectsRead(MavenSession session) throws MavenExecutionException {
+        for (MavenProject project : session.getProjects()) {
+            workspaceReader.addProject(project);
+        }
+    }
+
     protected void setupWorkspaceReader(MavenSession mavenSession) {
         try {
             MavenExecutionRequest request = mavenSession.getRequest();
