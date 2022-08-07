@@ -2,7 +2,6 @@ package tel.panfilov.maven.extensions.fakerepo;
 
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.MavenExecutionException;
-import org.apache.maven.eventspy.EventSpy;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.building.ModelBuildingRequest;
@@ -30,6 +29,7 @@ import java.util.List;
 public class FakeRepoMavenLifecycleParticipant extends AbstractMavenLifecycleParticipant {
 
     public static final String ENABLED_FLAG = "fakerepo";
+
     @Requirement
     private PlexusContainer container;
 
