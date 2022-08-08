@@ -3,7 +3,7 @@
 
     <groupId>tel.panfilov.maven</groupId>
     <artifactId>fakerepo</artifactId>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.5</version>
     <packaging>pom</packaging>
 
     <name>Maven Fake Repository</name>
@@ -12,7 +12,7 @@
         <connection>scm:git:git@github.com:andreybpanfilov/fakerepo.git</connection>
         <developerConnection>scm:git:git@github.com:andreybpanfilov/fakerepo.git</developerConnection>
         <url>https://github.com/andreybpanfilov/fakerepo</url>
-        <tag>HEAD</tag>
+        <tag>fakerepo-0.1.5</tag>
     </scm>
 
     <contributors>
@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.version>3.3.9</maven.version>
         <maven.plugin.tools.version>3.6.4</maven.plugin.tools.version>
-        <project.build.outputTimestamp>2022-08-07T19:22:56Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2022-08-08T10:55:11Z</project.build.outputTimestamp>
         <flatten.mode>oss</flatten.mode>
     </properties>
 
