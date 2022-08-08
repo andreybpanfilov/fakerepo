@@ -159,7 +159,7 @@ public class FakeWorkspaceReader implements WorkspaceReader {
                 .filter(Objects::nonNull)
                 .map(RepositoryUtils::toArtifact)
                 .filter(a -> requestedId.equals(getArtifactId(a)))
-                .filter(a -> Objects.equals(requested.getExtension(), a.getVersion()))
+                .filter(a -> Objects.equals(requested.getVersion(), a.getVersion()))
                 .map(Artifact::getFile)
                 .filter(Objects::nonNull)
                 .filter(File::exists)
